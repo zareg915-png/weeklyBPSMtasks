@@ -1,0 +1,46 @@
+#!/bin/bash
+# for files that are larger only do 
+head example_people_data.tsv
+tail example_people_data.tsv
+
+#Data cleaning
+
+#tell the programme field seprator is a tab
+awk 'BEGIN{FS="\t";}
+
+
+# if number of fields is = to 7 and row 1 is not a whitespace and row one is not "name" print every row (indicated by awk) starting with row 0 and repeat it for every row 
+{if(NF == 7 && $1 != "" && $1 !="name") {print $0}}
+
+
+# count according to above instructions  
+example_people_data.tsv > example_people_cleaned.tsv
+
+
+
+
+#Question number 1 How many people are there?
+echo" q1. number of people:"
+wc -l 
+
+
+#Question 2 How many people are aged around 30 or older?
+echo "2. Number aged around 30 or older:"
+awk 'BEGIN {FS = "\t";}{if ($6 <= 1996) {print $0;}}' people_clean.tsv | wc -l
+
+
+#Question 3 How many people are called Jan? 
+echo "Q3. Number of people called Jan or jan:"
+awk 'BEGIN {FS = "\t";}
+{if ($1 == "jan" || $1 == "Jan") {print $0;}}' example_people_cleaned.tsv | wc -l
+
+
+#Q4 What is the most common country of birth, and of the people from this country, how many are around 50 or older?
+country=$(awk 'BEGIN{FS="\t";} {if(NF == 7 && $1 != "" && $1 !="name") {print $7}}' example_people_data.tsv | sort | uniq -c | sort -k1,1nr| head -n 1 |awk '{sub(/^[[:space:]]*[0-9]+[[:space:]]*/, ""); print $0}')                                                                                           
+age=$(awk -v country="$country" '{if( $7 == country && $6 <= 1976){print $0;}}' example_people_data.tsv | wc -l)
+echo "Most common birth country is" $country "and from that" $age "people are around 50 or older"r
+
+
+
+#Q5 What are the names, in reverse alphabetical order within each country of birth, of the people with "edu" email addresses?
+grep '\.edu example_people_data.tsv | sort -k7,7 -k1,1r | cut -f1,7
