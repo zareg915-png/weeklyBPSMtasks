@@ -1,0 +1,36 @@
+#!/bin/bash
+
+#read tab_delimited input 
+awk -F '\t' '{print $0}' data/example_people_data.tsv
+
+#exclude the  header and blank lines 
+awk -F '\t' '$0 != "" {print $0}' data/example_people_data.tsv | tail -n +2
+#or 
+awk -F '\t' 'NR > 1 && $0 != "" {print $0}' data/example_people_data.tsv
+
+#count people by country 
+awk -F '\t' '$0 !~ /^[[:space:]]*$/ {print $7}' data/example_people_data.tsv | tail -n +2 | sort | uniq -c
+awk -F '\t' '$0 !~ /^[[:space:]]*$/ {print $7}' data/example_people_data.tsv | tail -n +2 | sort | uniq -c >> results/count_people_by_country
+
+
+#Save a country-frequency table, ordered from highest count to lowest
+awk -F '\t' '$0 !~ /^[[:space:]]*$/ {print $7}' data/example_people_data.tsv | tail -n +2 | sort | uniq -c | sort -nr > country_frequency_table 
+
+
+#ID most common country 
+head -n 1 country_frequency_table > most_frequent_country 
+
+
+#Count people from the most freq country whose birth year is 1976 or earlier
+#step1 extract only country name 
+read -r frequency country < most_frequent_country
+# step2 filter and count 
+awk -F '\t' -v country="$country" '$0 !~ /^[[:space:]]*$/ && $6 ~ /^[0-9]+$/  && $6 <=1976 && $7==country {print $6}' data/example_people_data.tsv | wc -l > number_of_people_aged_more_than_49
+
+
+number_of_people_aged_more_than_49=$(cat number_of_people_aged_more_than_49)
+echo "People from $country born in 1976 or earlier: $number_of_people_aged_more_than_49"
+echo "People from $country born in 1976 or earlier: $number_of_people_aged_more_than_49" >> results/number_of_people_aged_more_than_49
+
+
+
