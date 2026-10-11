@@ -1,1 +1,3 @@
-Original text
+<<<<<<< HEAD
+conflicting text chosen to merge
+>>>>>>> w2l2-branching-practice
