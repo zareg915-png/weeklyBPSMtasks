@@ -1,0 +1,119 @@
+#!/usr/bin/env bash
+# COX1 protein alignment and conservation analysis.
+#install Edirect 
+sh -c "$(wget -q https://ftp.ncbi.nlm.nih.gov/entrez/entrezdirect/install-edirect.sh -O -)"
+
+#Part	Meaning
+#wget	Downloads content from an internet address
+#-q	Quiet mode: hides normal download messages
+#https://.../install-edirect.sh	Address of NCBI’s installation script
+#-O -	Sends the downloaded content to standard output
+#$(...)	Runs the enclosed command and captures its output
+#sh	Starts a shell
+#-c	Tells that shell to execute the following text as commands
+#"..."	Keeps the captured script together as one argument
+
+
+
+
+#make it availible in the home directory 
+export PATH="$HOME/edirect:$PATH"
+
+
+
+
+#Part	Meaning
+#export	Makes the variable available to programs launched from this shell
+#PATH	List of directories searched for commands
+#=	Assigns a value
+#$HOME/edirect	EDirect’s directory inside your home directory
+#:	Separates directories in PATH
+#$PATH	Includes the existing directory list
+
+
+
+
+#store search term in a variable 
+cox1='Nematoda[Organism:exp] AND (COX1[Gene Name] OR CO1[Gene Name]) NOT partial'
+
+
+
+
+#save the search term for reproduciblity purposes 
+printf '%s\n' "$cox1" > cox1_search_terms.txt
+
+#Part	Meaning
+#printf	Prints text using a specified format
+#%s	Prints a text string
+#\n	Adds a newline
+#"$query"	Inserts the variable’s contents as one argument
+#>	Writes output to a file, creating or replacing it
+#query.txt	The output filename
+
+
+
+
+#test the search (spesifically the count)
+esearch -db protein -query "$cox1"
+
+#Part	Meaning
+#esearch	Searches NCBI
+#-db protein	Selects the protein database
+#-query "$cox1"	Supplies your search expression 
+
+
+
+
+#Download the proteins(You repeat esearch here because this time its output feeds directly into the download program.) 
+esearch -db protein -query "$cox1" | efetch -format fasta > cox_protien_seqs.fasta
+
+#efetch	Retrieves the records identified by the search
+#-format fasta	Requests sequences in FASTA format
+#> cox_protien_seqs.fasta  Saves the sequences in this file
+
+
+
+
+#check the downloads
+head -n 5 cox_protien_seqs.fasta
+
+
+
+
+#Count the sequences.
+grep -c '^>' cox_protien_seqs.fasta
+
+
+
+
+#Align
+clustalo -i cytoxseqs.fasta -o cytoxseqs_aligned.fasta --seqtype=Protein  --outfmt=fasta
+
+#clustalo	Runs Clustal Omega
+#-i cox_protien_seqs.fasta	Specifies the input file
+#-o cox_protien_aligned.fasta	Specifies the output file
+#--seqtype=Protein	Explicitly selects protein sequences
+#--outfmt=fasta	Saves the alignment as FASTA
+
+
+
+
+#generate conservation plot 
+plotcon -sequences cox_protien_aligned.fasta  -winsize 4 -graph png -goutfile plotcon_w4 
+
+#Part	Meaning and reason
+#plotcon	Calculates and plots sequence conservation
+#-sequences cox_protien_aligned.fasta 	Supplies the aligned proteins
+#-winsize 4	Summarises conservation across four adjacent alignment columns
+#-graph png	Saves the graph as a png image
+#-goutfile plotcon_w4	Sets a recognisable output filename prefix
+
+
+
+
+
+
+
+
+
+
