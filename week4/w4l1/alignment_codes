@@ -19,9 +19,6 @@ sh -c "$(wget -q https://ftp.ncbi.nlm.nih.gov/entrez/entrezdirect/install-edirec
 #make it availible in the home directory 
 export PATH="$HOME/edirect:$PATH"
 
-
-
-
 #Part	Meaning
 #export	Makes the variable available to programs launched from this shell
 #PATH	List of directories searched for commands
