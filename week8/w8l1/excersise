@@ -1,0 +1,24 @@
+#!/usr/bin/env python3
+
+#Q1
+#defining function 
+def aa_pro_ratio(pro_seq, aa):
+    aa_len = pro_seq.upper().count(aa.upper())
+    pro_len = len(pro_seq)
+    percentage = (aa_len / pro_len)*100
+    return percentage
+
+#assertions
+assert round(aa_pro_ratio("MSRSLLLRFLLFLLLLPPLP", "M")) == round(5)
+assert round(aa_pro_ratio("MSRSLLLRFLLFLLLLPPLP", "L")) == round(50)
+assert round(aa_pro_ratio("MSRSLLLRFLLFLLLLPPLP", "r")) == round(10)
+assert round(aa_pro_ratio("MSRSLLLRFLLFLLLLPPLP", "Y")) == round(0)
+
+#Q2
+aa_list = ["A", "I", "L", "M", "F", "W", "Y", "V"]
+for i in aa_list:
+	if aa_list = none
+            
+	aa = pro_seq.upper().count(aa.upper())
+	pro_len = len(pro_seq)
+else  

@@ -1,0 +1,6 @@
+#ignore directories/files that are called/end with tmp
+tmp/
+*.tmp
+*.swp
+#ignore editor back-up files
+*~
