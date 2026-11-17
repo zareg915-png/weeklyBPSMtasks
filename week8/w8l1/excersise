@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-#Q1
+#Q1 take two arguments (a protein sequence and an amino acid residue code) and returns the percentage of the protein that the amino acid makes up.
 #defining function 
 def aa_pro_ratio(pro_seq, aa):
     aa_len = pro_seq.upper().count(aa.upper())
@@ -14,11 +14,167 @@ assert round(aa_pro_ratio("MSRSLLLRFLLFLLLLPPLP", "L")) == round(50)
 assert round(aa_pro_ratio("MSRSLLLRFLLFLLLLPPLP", "r")) == round(10)
 assert round(aa_pro_ratio("MSRSLLLRFLLFLLLLPPLP", "Y")) == round(0)
 
-#Q2
-aa_list = ["A", "I", "L", "M", "F", "W", "Y", "V"]
-for i in aa_list:
-	if aa_list = none
-            
-	aa = pro_seq.upper().count(aa.upper())
-	pro_len = len(pro_seq)
-else  
+#Q2 Modify the function from the previous exercise above so that it accepts a list of amino acid residues rather than a single one, and count these within the protein sequence. If no list is given, the function should return the percentage of hydrophobic amino acid residues
+
+def aa_pro_ratio_list(pro_seq, aa_list=None):
+    # 1. Prepare the inputs
+    if aa_list is None:
+        aa_list = ["A", "I", "L", "M", "F", "W", "Y", "V"]
+
+    counted_aa = set()
+    start_count = 0
+
+    # 2. Count each requested residue
+    for aa in aa_list:
+        aa = aa.upper()
+
+        if aa not in counted_aa:
+            aa_count = pro_seq.count(aa)
+            nu_aa = start_count + aa_count
+            counted_aa.add(aa)
+
+    # 3. Calculate the percentage
+    protein_length = len(pro_seq)
+    percentage = (aa_count / protein_length) * 100
+    return percentage
+
+assert round(aa_pro_ratio_list("MSRSLLLRFLLFLLLLPPLP", ["M"])) == 5
+assert round(aa_pro_ratio_list("MSRSLLLRFLLFLLLLPPLP", ['F', 'S', 'L'])) == 70
+assert round(aa_pro_ratio_list("MSRSLLLRFLLFLLLLPPLP")) == 65
+
+
+#Q3 take a DNA sequence along with an optional threshold and return True or False to indicate whether the DNA sequence contains a high proportion of undetermined bases (i.e not A, T, G or C). Write some assertions to test whether the function works.
+
+def unknown_prop(dna_seq, threshold=None):
+    #set the default threashold to 0.5
+    if threshold is None:
+        threshold=0.5
+
+    # 1. Count undetermined bases
+    start_count = 0
+    base = ["A", "T", "C", "G"]
+    for n in dna_seq:
+        if n.upper() not in base:
+            start_count += 1
+
+    # 3. Compare the proportion with the threshold
+    proportion = undetermined_count / len(dna_seq)
+    return proportion > threshold
+
+
+assert unknown_prop("atgc") is False
+assert unknown_prop("ATGC") is False
+assert unknown_prop("ATNNN") is True
+assert unknown_prop("atnnn") is True
+assert unknown_prop("ATGCN", threshold=0.20) is False
+assert unknown_prop("atnnn", threshold=0.20) is True
+
+
+#Q4 Using the lecture notes as a guide, write functions that will show the structure of a database table chosen by you, the user (i.e. one fuction might rely on the output from the other).
+
+import os, MySQLdb
+from contextlib import closing
+
+
+def get_table_choice(cursor):
+    cursor.execute("SHOW TABLES")
+    tables = [row[0] for row in cursor.fetchall()]
+    if not tables:
+        print("No tables found in this database.")
+        return None
+
+    print("\nAvailable Tables:")
+    print("-" * 30)
+    for index, table_name in enumerate(tables, 1):
+        print(f"[{index}] {table_name}")
+    print("-" * 30)
+
+    while True:
+        try:
+            choice = input(f"Pick a table number (1-{len(tables)}) or 'q' to quit: ").strip()
+            if choice.lower() == "q":
+                return None
+
+            choice_num = int(choice)
+            if 1 <= choice_num <= len(tables):
+                return tables[choice_num - 1]
+            else:
+                print(f"Invalid number. Please choose between 1 and {len(tables)}.")
+        except ValueError:
+            print("Please enter a valid number or 'q'.")
+
+
+def show_table_structure(cursor, table_name):
+    cursor.execute(f"DESCRIBE {table_name}")
+    columns = cursor.fetchall()
+    print(f"\nStructure for table: '{table_name}'")
+    print("~" * 60)
+    print(f"{'Field Name':<20} | {'Type':<15} | {'Null Allowed?':<12} | {'Key'}")
+    print("~" * 60)
+    for col in columns:
+        print(f"{col[0]:<20} | {col[1]:<15} | {col[2]:<13} | {col[3]}")
+    print("-" * 60)
+
+
+try:
+    connection = MySQLdb.connect(
+        host="127.0.0.1",
+        user=os.environ["USER"],
+        passwd="YOUR_MYSQL_PASSWORD",
+        db=os.environ["USER"] + "_exercises"
+    )
+    with closing(connection), closing(connection.cursor()) as cursor:
+        table_name = get_table_choice(cursor)
+        if table_name is not None:
+            show_table_structure(cursor, table_name)
+except MySQLdb.Error as e:
+    print(f"Error: {e}")
+
+
+
+# Q5 K-mers are short DNA subsequences with length "k" bases, and are usually generated using the sliding window method we used in previous lecture exercises. Write a Python function that, given any DNA sequence, will print all the k-mers (e.g. 4-mers) that occur more than n times. E.g. with dna="ATGCATCATG", kmersize=2 and minfrequency=2 will output AT; because the kmers (kmersize) are 2 bases long, and there are three (minfrequency was 2) instances of "AT". Code you wrote for the previous lecture's exercises could be useful here...
+
+def frequent_kmers(dna, kmersize, minfrequency):
+    dna = dna.upper()
+    kmers_found = []
+
+    for start in range(len(dna) - kmersize + 1):
+        kmer = dna[start:start + kmersize]
+        kmers_found.append(kmer)
+
+    for kmer in set(kmers_found):
+        frequency = kmers_found.count(kmer)
+        if frequency > minfrequency:
+            print(kmer)
+
+
+frequent_kmers("ATGCATCATG", kmersize=2, minfrequency=2)
+
+
+#Q6 Write a Python script/programme that, given any DNA sequence, will print a list of k-mers that occur more than some number of times. The user should be asked to supply, on the command line, the following: 1. the sequence of interest 2. the kmer length for analysis 3. the threshold frequency of kmers found (i.e. the "more than this number" value)
+def frequent_kmers(dna, kmersize, minfrequency):
+    dna = dna.upper()
+    kmers_found = []
+
+    for start in range(len(dna) - kmersize + 1):
+        kmer = dna[start:start + kmersize]
+        kmers_found.append(kmer)
+
+    for kmer in set(kmers_found)):
+        frequency = kmers_found.count(kmer)
+        if frequency > minfrequency:
+            print(kmer)
+
+
+dna = input("Enter the DNA sequence: ").strip()
+
+try:
+    kmersize = int(input("Enter the k-mer length: "))
+    minfrequency = int(input("Enter the frequency threshold: "))
+except ValueError:
+    raise SystemExit("Enter whole numbers for the k-mer length and threshold.")
+
+if kmersize < 1 or minfrequency < 0:
+    raise SystemExit("Use a k-mer length of at least 1 and a threshold of at least 0.")
+
+print_frequent_kmers(dna, kmersize, minfrequency)
